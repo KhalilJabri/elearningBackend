@@ -3,6 +3,8 @@ package org.example.crtekup.models;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -10,7 +12,6 @@ import lombok.*;
 @Entity
 @ToString
 @EqualsAndHashCode
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class Dossier {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
@@ -18,4 +19,11 @@ public class Dossier {
     private String name;
     private String description;
     private boolean available;
+    
+    @ManyToOne
+    @JoinColumn(name = "cours_id", nullable = false)
+    private Cours coursDossier;
+
+    @OneToMany(mappedBy = "dossier", cascade = CascadeType.ALL)
+    private List<Video> ListVideos;
 }

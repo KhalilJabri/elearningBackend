@@ -1,9 +1,10 @@
 package org.example.crtekup.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
+import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -12,7 +13,12 @@ import lombok.*;
 @Entity
 @ToString
 @EqualsAndHashCode
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class Admin extends Personne{
-    private String attribut;
+    private LocalDate dateInscription;
+
+    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL)
+    private List<AncienExamen> ListAncienExamens;
+
+    @OneToMany(mappedBy = "adminCours", cascade = CascadeType.ALL)
+    private List<Cours> ListCours;
 }

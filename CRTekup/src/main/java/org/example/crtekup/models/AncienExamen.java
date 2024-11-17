@@ -10,7 +10,6 @@ import lombok.*;
 @Entity
 @ToString
 @EqualsAndHashCode
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class AncienExamen {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
@@ -19,4 +18,7 @@ public class AncienExamen {
     private String name;
     private String description;
     private boolean status;
+    @ManyToOne
+    @JoinColumn(name = "admin_id", nullable = false)
+    private Admin admin;
 }

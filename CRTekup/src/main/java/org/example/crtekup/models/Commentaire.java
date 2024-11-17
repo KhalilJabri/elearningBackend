@@ -13,11 +13,18 @@ import java.time.LocalDate;
 @Entity
 @ToString
 @EqualsAndHashCode
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class Commentaire {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
     private Long id;
     private String contenu;
     private LocalDate date;
+
+    @ManyToOne
+    @JoinColumn(name = "etudiant_id", nullable = false)
+    private Etudiant etudiantCommentaire;
+
+    @ManyToOne
+    @JoinColumn(name = "video_id", nullable = false)
+    private Video video;
 }

@@ -1,9 +1,9 @@
 package org.example.crtekup.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
+import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -12,7 +12,9 @@ import lombok.*;
 @Entity
 @ToString
 @EqualsAndHashCode
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class Enseignant extends Personne{
     private String matiere;
+
+    @OneToMany(mappedBy = "enseignant", cascade = CascadeType.ALL)
+    private List<DemandeCours> ListDemandeCours;
 }

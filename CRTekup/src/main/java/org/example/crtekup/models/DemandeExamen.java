@@ -10,9 +10,9 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(name = "DemandeExamen")
 @ToString
 @EqualsAndHashCode
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class DemandeExamen {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
@@ -23,5 +23,7 @@ public class DemandeExamen {
     private EnumStatus status;
     private LocalDate created_at;
     private LocalDate date_examen;
-
+    @ManyToOne
+    @JoinColumn(name = "etudiant_id", nullable = false)
+    private Etudiant etudiantDemandeExamen;
 }

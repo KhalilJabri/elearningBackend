@@ -12,7 +12,6 @@ import java.time.LocalDate;
 @Entity
 @ToString
 @EqualsAndHashCode
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class DemandeCours {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
@@ -21,4 +20,11 @@ public class DemandeCours {
     private String coursName;
     private EnumStatus status;
     private LocalDate created_at;
+    @ManyToOne
+    @JoinColumn(name = "enseignant_id", nullable = false)
+    private Enseignant enseignant;
+
+    @OneToOne
+    @JoinColumn(name = "cours_id", nullable = false, unique = true)
+    private Cours cours;
 }

@@ -3,6 +3,9 @@ package org.example.crtekup.models;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -10,7 +13,6 @@ import lombok.*;
 @Entity
 @ToString
 @EqualsAndHashCode
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class Cours {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
@@ -19,4 +21,17 @@ public class Cours {
     private String description;
     private boolean available;
     private int rate;
+
+    @OneToMany(mappedBy = "coursDossier", cascade = CascadeType.ALL)
+    private List<Dossier> ListDossiers;
+
+    @ManyToOne
+    @JoinColumn(name = "admin_id", nullable = false)
+    private Admin adminCours;
+
+    @OneToOne(mappedBy = "cours", cascade = CascadeType.ALL)
+    private DemandeCours demandeCours;
+
+    @OneToMany(mappedBy = "coursFavoris", cascade = CascadeType.ALL)
+    private List<Favoris> favoris = new ArrayList<>();
 }

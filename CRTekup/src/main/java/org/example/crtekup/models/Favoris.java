@@ -10,9 +10,16 @@ import lombok.*;
 @Entity
 @ToString
 @EqualsAndHashCode
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class Favoris {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "etudiant_id", nullable = false)
+    private Etudiant etudiantFavoris;
+
+    @ManyToOne
+    @JoinColumn(name = "cours_id", nullable = false)
+    private Cours coursFavoris;
 }
