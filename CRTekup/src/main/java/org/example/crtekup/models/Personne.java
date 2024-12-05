@@ -2,8 +2,15 @@ package org.example.crtekup.models;
 
 import jakarta.persistence.*;
 import lombok.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Email;
+import org.springframework.security.core.GrantedAuthority;
 
-import java.util.Date;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -12,17 +19,43 @@ import java.util.Date;
 @Entity
 @ToString
 @EqualsAndHashCode
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Personne {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
-    private Long id;
-    private String firstName;
-    private String lastName;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @NotBlank
+    @Size(min = 1, max = 50)
+    private String name;
+
+    @NotNull
+    @Email
     private String email;
+
+    @NotBlank
+    @Size(min = 6, max = 100)
     private String password;
-    private boolean status;
-    private EnumRole role;
+
+    @Column(nullable = false)
+    private boolean isActive;
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinTable(
+            name = "personne_roles",
+            joinColumns = @JoinColumn(name = "personne_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
 
 
+
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        Set<GrantedAuthority> authorities = new HashSet<>();
+        for (Role role : roles) {
+            authorities.add(() -> String.valueOf(role.getName()));
+        }
+        return authorities;
+    }
 }

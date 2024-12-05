@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class CrTekupApplicationTests {
+public class CrTekupApplicationTests {
 
     @Test
     void contextLoads() {
+        // Vérifie que le contexte de l'application se charge correctement
     }
-
 }
