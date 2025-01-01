@@ -47,7 +47,10 @@ public class UserInfoService implements UserDetailsService {
 
     public String updateUser(Long id, Personne personneUpdate) {//Mise à jour des informations de personne
         Optional<Personne> personne = repository.findById(id);
+<<<<<<< HEAD
 
+=======
+>>>>>>> ac499f880cee283fc65d0eb7583841c897ec211a
         if (personne.isPresent()) {
             Personne user = personne.get();
             user.setEmail(personneUpdate.getEmail());
@@ -57,6 +60,7 @@ public class UserInfoService implements UserDetailsService {
             repository.save(user);
             return "User updated Successfully";
         } else {
+<<<<<<< HEAD
             throw new RuntimeException("User not found"); // Si l'utilisateur n'est pas trouvé
         }
     }
@@ -66,4 +70,10 @@ public class UserInfoService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
 
     }
+=======
+            return "User not found with id: " + id;
+        }
+    }
+
+>>>>>>> ac499f880cee283fc65d0eb7583841c897ec211a
 }

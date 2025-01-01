@@ -62,6 +62,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
     }
+<<<<<<< HEAD
     @GetMapping("/viewUser/{username}")
     public ResponseEntity<Personne> getUserProfile(@PathVariable String username) {
         Personne personne = service.getPersonneProfile(username);
@@ -72,4 +73,6 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);  // 404 Not Found
         }
     }
+=======
+>>>>>>> ac499f880cee283fc65d0eb7583841c897ec211a
     }
