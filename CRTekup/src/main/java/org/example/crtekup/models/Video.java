@@ -20,6 +20,7 @@ public class Video {
     private String title;
     private String description;
     private String available;
+    private String filepath;
 
     @ManyToOne
     @JoinColumn(name = "dossier_id", nullable = false)

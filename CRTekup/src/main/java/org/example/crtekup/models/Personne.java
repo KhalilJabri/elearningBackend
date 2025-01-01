@@ -28,7 +28,11 @@ public class Personne {
 
     @NotBlank
     @Size(min = 1, max = 50)
-    private String name;
+    private String firstName;
+
+    @NotBlank
+    @Size(min = 1, max = 50)
+    private String lastName;
 
     @NotNull
     @Email

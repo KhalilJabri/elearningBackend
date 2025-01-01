@@ -11,7 +11,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserInfoService implements UserDetailsService {
@@ -30,7 +32,8 @@ public class UserInfoService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 personne.getEmail(), // Utiliser email pour l'authentification
                 personne.getPassword(),
-                List.of(new SimpleGrantedAuthority(personne.getRoles().toString()))
+                Collections.emptyList()
+//                List.of(new SimpleGrantedAuthority(personne.getRoles().toString()))
         );
     }
 
@@ -40,5 +43,27 @@ public class UserInfoService implements UserDetailsService {
         personne.setPassword(encoder.encode(personne.getPassword()));
         repository.save(personne);
         return "User Added Successfully";
+    }
+
+    public String updateUser(Long id, Personne personneUpdate) {//Mise à jour des informations de personne
+        Optional<Personne> personne = repository.findById(id);
+
+        if (personne.isPresent()) {
+            Personne user = personne.get();
+            user.setEmail(personneUpdate.getEmail());
+            user.setFirstName(personneUpdate.getFirstName());
+            user.setLastName(personneUpdate.getLastName());
+            user.setPassword(encoder.encode(personneUpdate.getPassword()));
+            repository.save(user);
+            return "User updated Successfully";
+        } else {
+            throw new RuntimeException("User not found"); // Si l'utilisateur n'est pas trouvé
+        }
+    }
+
+    public Personne getPersonneProfile(String username) {
+        return repository.findByEmail(username) // Utiliser le champ email
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
+
     }
 }
