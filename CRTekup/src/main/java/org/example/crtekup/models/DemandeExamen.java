@@ -1,3 +1,4 @@
+
 package org.example.crtekup.models;
 
 import jakarta.persistence.*;
@@ -19,7 +20,7 @@ public class DemandeExamen {
     private Long id;
     private String description;
     private String coursName;
-    private EnumType type;
+    private MyEnumType type;
     private EnumStatus status;
     private LocalDate created_at;
     private LocalDate date_examen;

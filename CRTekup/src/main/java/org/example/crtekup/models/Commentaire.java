@@ -1,3 +1,5 @@
+
+
 package org.example.crtekup.models;
 
 import jakarta.persistence.*;

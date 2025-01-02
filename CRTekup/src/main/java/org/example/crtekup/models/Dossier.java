@@ -1,3 +1,4 @@
+
 package org.example.crtekup.models;
 
 import jakarta.persistence.*;
@@ -19,7 +20,7 @@ public class Dossier {
     private String name;
     private String description;
     private boolean available;
-    
+
     @ManyToOne
     @JoinColumn(name = "cours_id", nullable = false)
     private Cours coursDossier;

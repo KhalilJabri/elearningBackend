@@ -1,6 +1,6 @@
 package org.example.crtekup.models;
 
-public enum EnumType {
+public enum MyEnumType {
     WHITE_TEST,
     CERTIF
 }
