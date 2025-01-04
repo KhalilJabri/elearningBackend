@@ -3,6 +3,7 @@ package org.example.crtekup.service;
 import org.example.crtekup.models.DemandeExamen;
 import org.example.crtekup.models.EnumStatus;
 import org.example.crtekup.models.Etudiant;
+import org.example.crtekup.models.MyEnumType;
 import org.example.crtekup.repository.DemandeExamenRepository;
 import org.example.crtekup.repository.EtudiantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,5 +60,25 @@ public class DemandeExamenService {
             return Optional.of(d);
         }
         return Optional.empty();
+    }
+
+    // Récupérer toutes les demandes Certif
+    public List<DemandeExamen> getAllDemandeCoursCertif() {
+        return demandeExamenRepository.findAllDemandeCoursCertif(MyEnumType.CERTIF);
+    }
+
+    // Rechercher par nom de cours
+    public List<DemandeExamen> rechercheDemandeNom(String coursName) {
+        return demandeExamenRepository.findDemandesCertifByName(coursName,MyEnumType.CERTIF);
+    }
+
+    // Filtrer par date de création
+    public List<DemandeExamen> rechercheDemandeDateCreation(LocalDate startDate, LocalDate endDate) {
+        return demandeExamenRepository.findDemandesCertifByDate(startDate, endDate,MyEnumType.CERTIF);
+    }
+
+    // Filtrer par nom etudiant
+    public List<DemandeExamen> getDemandesCertifByNomEtudiant(String nomEtudiant) {
+        return demandeExamenRepository.findDemandeCertifByNameEtudiant(nomEtudiant,MyEnumType.CERTIF);
     }
 }

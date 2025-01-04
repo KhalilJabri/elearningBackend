@@ -6,7 +6,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,21 +16,25 @@ public class UserInfoDetails implements UserDetails {
 
     private String username;
     private String password;
-    private List<GrantedAuthority> authorities;
-
+    private GrantedAuthority authority;
 
     public UserInfoDetails(Personne personne) {
         this.username = personne.getEmail();
         this.password = personne.getPassword();
 
-        this.authorities = personne.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName().name())) // Assurez-vous que Role a un champ 'name' qui est un Enum
-                .collect(Collectors.toList());
+        if (personne.getRole() != null) {
+            // On prend le rôle et on crée l'autorité
+            this.authority = new SimpleGrantedAuthority("ROLE_" + personne.getRole());
+        } else {
+            // Si aucun rôle n'est défini, on attribue un rôle par défaut
+            this.authority = new SimpleGrantedAuthority("ROLE_USER");
+        }
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+        // Retourner une collection contenant une seule autorité
+        return Collections.singletonList(this.authority);
     }
 
     @Override

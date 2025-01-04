@@ -5,12 +5,14 @@ import org.example.crtekup.models.DemandeExamen;
 import org.example.crtekup.models.Etudiant;
 import org.example.crtekup.service.DemandeExamenService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +30,6 @@ public class DemandeExamenController {
         DemandeExamen createdDemandeExamen = demandeExamenService.soumettreDemandeExamen(etudiantId, demandeExamen);
         return ResponseEntity.ok(createdDemandeExamen);  // Retourner la demande créée
     }
-
 
 
     // Endpoint pour récupérer toutes les demandes d'examen en cours
@@ -55,5 +56,27 @@ public class DemandeExamenController {
             return ResponseEntity.ok("Demande refusée");
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/allDemandeCoursCertif")
+    public List<DemandeExamen> getAllDemandeCoursCertif() {
+        return demandeExamenService.getAllDemandeCoursCertif();
+    }
+
+    @GetMapping("/search")
+    public List<DemandeExamen> rechercheDemandeNom(@RequestParam String coursName) {
+        return demandeExamenService.rechercheDemandeNom(coursName);
+    }
+
+    @GetMapping("/searchDate")
+    public List<DemandeExamen> rechercheDemandeDateCreation(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        return demandeExamenService.rechercheDemandeDateCreation(startDate, endDate);
+    }
+
+    @GetMapping("/searchDemandNomEtudiant")
+    public List<DemandeExamen> getDemandesCertifByNomEtudiant(String nomEtudiant){
+     return demandeExamenService.getDemandesCertifByNomEtudiant(nomEtudiant);
     }
 }

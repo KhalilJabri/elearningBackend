@@ -5,6 +5,7 @@ import org.example.crtekup.repository.VideoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,4 +32,7 @@ public class VideoService{
         videoRepository.deleteById(id);
     }
 
+    public List<Video> getAllVideos() {
+        return videoRepository.findAll();
+    }
 }

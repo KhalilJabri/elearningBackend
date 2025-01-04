@@ -1,12 +1,10 @@
 package org.example.crtekup.service;
 
-import org.example.crtekup.models.*;
-import org.example.crtekup.repository.RoleRepository;
+import org.example.crtekup.models.Personne;
 import org.example.crtekup.repository.UserInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,74 +19,57 @@ public class UserInfoService implements UserDetailsService {
 
     @Autowired
     private UserInfoRepository repository;
-    @Autowired
-    private RoleRepository roleRepository;
+
     @Autowired
     @Lazy
     private PasswordEncoder encoder;
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Personne personne = repository.findByEmail(username)
+        Personne personne = repository.findByEmail(username) // Utiliser le champ email
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
 
-        List<SimpleGrantedAuthority> authorities = personne.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName().name()))
-                .toList();
-
         return new org.springframework.security.core.userdetails.User(
-                personne.getEmail(),
+                personne.getEmail(), // Utiliser email pour l'authentification
                 personne.getPassword(),
-                authorities
+                List.of(new SimpleGrantedAuthority(personne.getRole().toString()))
         );
     }
 
-
-
-    public String addUser(Personne personne) {
-        // Encode le mot de passe
+    public String addUser(Personne personne,String roleName) {
+        //Test if user exist
+        if (repository.findByEmail(personne.getEmail()).isPresent()) throw new RuntimeException("User already exists!");
+        // Encode password before saving the user
         personne.setPassword(encoder.encode(personne.getPassword()));
-
-        // Ajouter un rôle par défaut (par exemple, ROLE_ETUDIANT)
-        Role defaultRole = roleRepository.findByName(ERole.ROLE_ETUDIANT)
-                .orElseThrow(() -> new RuntimeException("role not found"));
-
-        personne.getRoles().add(defaultRole);
-
-        // Sauvegarder la personne avec le rôle associé
         repository.save(personne);
-
         return "User Added Successfully";
     }
 
-    public String updateUser(Long id, Personne personneUpdate) {
-        // Retrieve user from the repository using ID
+    public String updateUser(Long id, Personne personneUpdate) {//Mise à jour des informations de personne
         Optional<Personne> personne = repository.findById(id);
-
         if (personne.isPresent()) {
             Personne user = personne.get();
-
-            // Update user properties
             user.setEmail(personneUpdate.getEmail());
             user.setFirstName(personneUpdate.getFirstName());
             user.setLastName(personneUpdate.getLastName());
-            user.setPassword(encoder.encode(personneUpdate.getPassword()));  // Encoding password before saving
-
-            // Save the updated user back to the repository
+            user.setPassword(encoder.encode(personneUpdate.getPassword()));
             repository.save(user);
-            return "User updated successfully"; // Return success message
+            return "User updated Successfully";
         } else {
-            return "User not found with id: " + id; // User not found with provided ID
+            throw new RuntimeException("User not found"); // Si l'utilisateur n'est pas trouvé
         }
     }
 
-    public Personne getUserProfile(String username) {
-        // Rechercher l'utilisateur par son email (ici le 'username' est l'email)
-        Personne personne = repository.findByEmail(username)
+    public Personne getPersonneProfile(String username) {
+        return repository.findByEmail(username) // Utiliser le champ email
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
 
-        // Retourner l'utilisateur trouvé
-        return personne;
     }
 
+    public List<Personne> getAllPersonne() {
+        return repository.findAll();
+    }
 
+    public Personne getPersonneById(Long id) {
+        return repository.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
+    }
 }
