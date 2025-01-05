@@ -60,6 +60,7 @@ public class DemandeExamenController {
     }
 
     @GetMapping("/allDemandeCoursCertif")
+
     public ResponseEntity<List<DemandeExamen>> getAllDemandeCoursCertif() {
         System.out.println("Appel de l'API /allDemandeCoursCertif");
         try {
@@ -82,14 +83,20 @@ public class DemandeExamenController {
     }
 
     @GetMapping("/searchDate")
-    public List<DemandeExamen> rechercheDemandeDateCreation(
+    public ResponseEntity<List<DemandeExamen>> rechercheDemandeDateCreation(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        return demandeExamenService.rechercheDemandeDateCreation(startDate, endDate);
+        try {
+            List<DemandeExamen> demandeExamenNom = demandeExamenService.rechercheDemandeDateCreation(startDate, endDate);
+            return ResponseEntity.status(HttpStatus.CREATED).body(demandeExamenNom);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
 //    @GetMapping("/searchDemandNomEtudiant")
 //    public List<DemandeExamen> getDemandesCertifByNomEtudiant(String nomEtudiant){
 //     return demandeExamenService.getDemandesCertifByNomEtudiant(nomEtudiant);
 //    }
+
 }
