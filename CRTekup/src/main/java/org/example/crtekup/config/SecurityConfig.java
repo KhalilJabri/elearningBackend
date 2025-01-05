@@ -48,6 +48,7 @@ public class SecurityConfig {
                                 .requestMatchers("/auth/profile").authenticated()
                                 .requestMatchers("/auth/updateUser/**").permitAll()
                                 .requestMatchers("/api/cours/**").permitAll()
+                                .requestMatchers("/api/enseignant/**").permitAll()
                                 .requestMatchers("/api/demandes-examen/**").permitAll()
                                 .anyRequest().authenticated()
                         // Secure all other routes

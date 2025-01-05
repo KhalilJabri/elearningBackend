@@ -1,4 +1,3 @@
-
 package org.example.crtekup.Controller;
 
 import org.example.crtekup.models.AuthRequest;
@@ -12,9 +11,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/auth")
@@ -35,11 +35,20 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public String register(@RequestBody Personne personne) {
-        return service.addUser(personne);
+    public ResponseEntity<String>  register(@RequestBody Personne personne){
+        try {
+        service.addUser(personne);
+        return ResponseEntity.ok("User updated successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User already exists!");
+        }
     }
+
     @PostMapping("/login")
     public String authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
+        if (authRequest == null) {
+            throw new IllegalArgumentException("Request body is missing");
+        }
         System.out.println("Request received for token generation: " + authRequest.getUsername());
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
@@ -51,20 +60,36 @@ public class UserController {
             throw new UsernameNotFoundException("Invalid user request!");
         }
     }
-    @GetMapping("/profile")
-    public ResponseEntity<Personne> getUserProfile(Authentication authentication) {
-        String username = authentication.getName();  // Extract username from the token
-        Personne userProfile = service.getUserProfile(username);  // Retrieve user profile
-        return ResponseEntity.ok(userProfile);  // Return profile in response
-    }
 
     @PutMapping("/updateUser/{id}")
     public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody Personne updatedPersonne) {
-        String result = service.updateUser(id, updatedPersonne);
-        if (result.startsWith("User not found")) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
+        try {
+            // Appeler le service pour mettre à jour l'utilisateur
+            service.updateUser(id, updatedPersonne);
+            return ResponseEntity.ok("User updated successfully");
+        } catch (Exception e) {
+            // Gérer l'exception si l'utilisateur n'est pas trouvé ou s'il y a une erreur
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
-        return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/viewUsers")
+    public ResponseEntity<List<Personne>> getUsers() {
+        List<Personne> personnes = service.getAllPersonne();
+        if (personnes.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Retourne 404 si la liste est vide
+        }
+        return new ResponseEntity<>(personnes, HttpStatus.OK); // Retourne la liste si elle n'est pas vide
+
+    }
+
+    @GetMapping("/viewProfil/{id}")
+    public ResponseEntity<Personne> getViewProfil(@PathVariable Long id) {
+        Personne personne = service.getPersonneById(id);
+        if (personne != null) {
+            return new ResponseEntity<>(personne, HttpStatus.OK);  // 200 OK
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);  // 404 Not Found
+        }
+    }
 }

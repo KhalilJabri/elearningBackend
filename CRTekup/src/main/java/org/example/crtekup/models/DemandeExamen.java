@@ -20,6 +20,7 @@ public class DemandeExamen {
     private Long id;
     private String description;
     private String coursName;
+    @Enumerated(EnumType.STRING)
     private MyEnumType type;
     private EnumStatus status;
     private LocalDate created_at;

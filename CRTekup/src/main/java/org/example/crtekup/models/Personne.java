@@ -23,7 +23,6 @@ import java.util.Set;
 @ToString
 @EqualsAndHashCode
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-@JsonIgnoreProperties({"roles"})
 public class Personne implements Serializable {
 
     @Id
@@ -49,21 +48,15 @@ public class Personne implements Serializable {
     @Column(nullable = false)
     private boolean isActive;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(
-            name = "personne_roles",
-            joinColumns = @JoinColumn(name = "personne_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
+    @Enumerated(EnumType.STRING)
+    private ERole role;
 
-    private Set<Role> roles = new HashSet<>();
-
-
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        Set<GrantedAuthority> authorities = new HashSet<>();
-        for (Role role : roles) {
-            authorities.add(() -> String.valueOf(role.getName()));
-        }
-        return authorities;
-    }
+//    // Ajout de la méthode getAuthorities pour Spring Security
+//    public Collection<? extends GrantedAuthority> getAuthorities() {
+//        Set<GrantedAuthority> authorities = new HashSet<>();
+//        if (role != null) {
+//            authorities.add(() -> "ROLE_" + role.name()); // "ROLE_" suivi du nom du rôle
+//        }
+//        return authorities;
+//    }
 }

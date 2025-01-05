@@ -1,4 +1,3 @@
-
 package org.example.crtekup.Controller;
 
 import org.example.crtekup.models.Video;
@@ -18,20 +17,21 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Objects;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/videos")
+@RequestMapping("/api/video")
 public class VideoController {
     private VideoService videoService;
     // Le répertoire où les vidéos seront stockées
     @Value("${video.upload-dir}")
     private String uploadDir;
 
-    // Point d'upload pour la vidéo
-    @PostMapping("/upload")
-    public ResponseEntity<String> uploadVideo(@RequestParam("file") MultipartFile file) {
+    // Upload pour la vidéo
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> uploadVideo(@RequestPart("video") Video video,
+                                              @RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
             return new ResponseEntity<>("Le fichier est vide", HttpStatus.BAD_REQUEST);
         }
@@ -44,8 +44,14 @@ public class VideoController {
             }
 
             // Sauvegarde la vidéo sur le disque
-            Path destinationPath = path.resolve(Objects.requireNonNull(file.getOriginalFilename()));
+            Path destinationPath = path.resolve(file.getOriginalFilename());
             file.transferTo(destinationPath);
+
+            // Mettre à jour l'objet vidéo avec le chemin du fichier
+            video.setFilepath(destinationPath.toString());
+
+            // Sauvegarder les informations dans la base de données (seulement title, description, filepath)
+            videoService.saveVideo(video);
 
             return new ResponseEntity<>("Vidéo téléchargée avec succès : " + file.getOriginalFilename(), HttpStatus.OK);
         } catch (IOException e) {
@@ -53,8 +59,9 @@ public class VideoController {
         }
     }
 
+
     // Voir une vidéo à partir du disque
-    @GetMapping("/view/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<byte[]> viewVideo(@PathVariable Long id) {
         Optional<Video> videoOpt = videoService.findById(id);
 
@@ -82,5 +89,20 @@ public class VideoController {
         } catch (IOException e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+    // Video pour supprimer un cours
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> videoCours(@PathVariable Long id) {
+        try {
+            videoService.deleteVideo(id);
+            return ResponseEntity.noContent().build(); // 204 No Content
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 404 Not Found
+        }
+    }
+    // Récupérer tous les videos
+    @GetMapping("/getAll")
+    public List<Video> getAllVideos() {
+        return videoService.getAllVideos();
     }
 }
