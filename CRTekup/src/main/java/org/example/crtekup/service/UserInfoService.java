@@ -1,6 +1,9 @@
 package org.example.crtekup.service;
 
-import org.example.crtekup.models.Personne;
+import org.example.crtekup.models.*;
+import org.example.crtekup.repository.AdminRepository;
+import org.example.crtekup.repository.EnseignantRepository;
+import org.example.crtekup.repository.EtudiantRepository;
 import org.example.crtekup.repository.UserInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -19,6 +22,15 @@ public class UserInfoService implements UserDetailsService {
 
     @Autowired
     private UserInfoRepository repository;
+
+  /*  @Autowired
+    private AdminRepository adminRepository;
+
+    @Autowired
+    private EnseignantRepository enseignantRepository;
+
+    @Autowired
+    private EtudiantRepository etudiantRepository; */
 
     @Autowired
     @Lazy
@@ -40,6 +52,20 @@ public class UserInfoService implements UserDetailsService {
         if (repository.findByEmail(personne.getEmail()).isPresent()) throw new RuntimeException("User already exists!");
         // Encode password before saving the user
         personne.setPassword(encoder.encode(personne.getPassword()));
+
+        /* TODO */
+        // enregistrement des users sera dans la table personne, alors qu'il existe des relations
+        // avec la table Etudiant, Admin et Enseignant
+        // il faut les ajouter dans la bonne classe
+        /*
+        if(ERole.ROLE_ETUDIANT.equals(personne.getRole())){
+            adminRepository.save((Admin) personne);
+        }else if(ERole.ROLE_ADMIN.equals(personne.getRole())){
+            enseignantRepository.save((Enseignant) personne);
+        }else if(ERole.ROLE_ENSEIGNANT.equals(personne.getRole())){
+            etudiantRepository.save((Etudiant) personne);
+        }
+         */
         repository.save(personne);
         return "User Added Successfully";
     }

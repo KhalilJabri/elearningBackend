@@ -1,5 +1,6 @@
 package org.example.crtekup.Controller;
 
+import org.example.crtekup.models.Dossier;
 import org.example.crtekup.models.Video;
 import org.example.crtekup.service.VideoService;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
+import org.springframework.beans.factory.annotation.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,14 +24,17 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/video")
 public class VideoController {
+    @Autowired
     private VideoService videoService;
+
     // Le répertoire où les vidéos seront stockées
     @Value("${video.upload-dir}")
     private String uploadDir;
 
     // Upload pour la vidéo
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadVideo(@RequestPart("video") Video video,
+    public ResponseEntity<String> uploadVideo(@RequestParam("title") String title,
+                                              @RequestParam("description") String description,
                                               @RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
             return new ResponseEntity<>("Le fichier est vide", HttpStatus.BAD_REQUEST);
@@ -43,16 +47,20 @@ public class VideoController {
                 Files.createDirectories(path);
             }
 
-            // Sauvegarde la vidéo sur le disque
+            // Sauvegarder la vidéo sur le disque
             Path destinationPath = path.resolve(file.getOriginalFilename());
             file.transferTo(destinationPath);
-
-            // Mettre à jour l'objet vidéo avec le chemin du fichier
+            // Enregistrer le chemin de la vidéo dans la base de données
+            Video video = new Video();
+            video.setTitle(title);
+            video.setDescription(description);
+            video.setAvailable("True");
             video.setFilepath(destinationPath.toString());
 
-            // Sauvegarder les informations dans la base de données (seulement title, description, filepath)
+            // Sauvegarder l'objet vidéo dans la base de données
             videoService.saveVideo(video);
 
+            // Retourner une réponse indiquant que la vidéo a été téléchargée avec succès
             return new ResponseEntity<>("Vidéo téléchargée avec succès : " + file.getOriginalFilename(), HttpStatus.OK);
         } catch (IOException e) {
             return new ResponseEntity<>("Erreur lors du téléchargement de la vidéo", HttpStatus.INTERNAL_SERVER_ERROR);

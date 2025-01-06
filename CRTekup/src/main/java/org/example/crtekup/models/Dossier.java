@@ -25,6 +25,6 @@ public class Dossier {
     @JoinColumn(name = "cours_id", nullable = false)
     private Cours coursDossier;
 
-    @OneToMany(mappedBy = "dossier", cascade = CascadeType.ALL)
-    private List<Video> ListVideos;
+//    @OneToMany(mappedBy = "dossier", cascade = CascadeType.ALL)
+//    private List<Video> ListVideos;
 }

@@ -22,9 +22,9 @@ public class Video {
     private String available;
     private String filepath;
 
-    @ManyToOne
-    @JoinColumn(name = "dossier_id", nullable = false)
-    private Dossier dossier;
+//    @ManyToOne
+//    @JoinColumn(name = "dossier_id", nullable = false)
+//    private Dossier dossier;
 
     @OneToMany(mappedBy = "video", cascade = CascadeType.ALL)
     private List<Commentaire> commentaires = new ArrayList<>();
