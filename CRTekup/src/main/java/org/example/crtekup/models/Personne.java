@@ -46,7 +46,7 @@ public class Personne implements Serializable {
     private String password;
 
     @Column(nullable = false)
-    private boolean isActive;
+    private Boolean isActive;
 
     @Enumerated(EnumType.STRING)
     private ERole role;

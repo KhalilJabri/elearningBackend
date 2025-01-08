@@ -1,8 +1,10 @@
 package org.example.crtekup.Controller;
 
 import org.example.crtekup.models.AuthRequest;
+import org.example.crtekup.models.AuthResponse;
 import org.example.crtekup.models.Personne;
 import org.example.crtekup.service.JwtService;
+import org.example.crtekup.service.UserInfoDetails;
 import org.example.crtekup.service.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/auth")
@@ -35,38 +38,68 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String>  register(@RequestBody Personne personne){
+    public ResponseEntity<String> register(@RequestBody Personne personne) {
         try {
-        service.addUser(personne);
-        return ResponseEntity.ok("User updated successfully");
+            // Vérifier si un utilisateur avec le même email existe déjà
+            if (service.isEmailExist(personne.getEmail())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User already exists!");
+            }
+
+            // Si l'email n'existe pas, ajouter l'utilisateur
+            service.addUser(personne);
+            return ResponseEntity.ok("User added successfully");
+
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User already exists!");
+            // Gestion des autres erreurs
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while registering the user.");
         }
     }
 
+
     @PostMapping("/login")
-    public String authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
+    public AuthResponse authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
         if (authRequest == null) {
             throw new IllegalArgumentException("Request body is missing");
         }
+
         System.out.println("Request received for token generation: " + authRequest.getUsername());
+
+        // Authentification
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
         );
+
         if (authentication.isAuthenticated()) {
-            System.out.println("User authenticated: " + authRequest.getUsername());
-            return jwtService.generateToken(authRequest.getUsername());
+            // Génération du token JWT
+            String token = jwtService.generateToken(authRequest.getUsername());
+
+            // Récupération des détails utilisateur
+            UserInfoDetails userDetails = (UserInfoDetails) authentication.getPrincipal();
+
+            // Récupérer les informations de l'utilisateur
+            String username = userDetails.getUsername();
+            Long userId = userDetails.getId();  // Récupérer l'ID
+
+            // Extraire le rôle sans "ROLE_"
+            String role = userDetails.getAuthorities().stream()
+                    .map(authority -> authority.getAuthority().replace("ROLE_", ""))  // Enlever "ROLE_"
+                    .findFirst()
+                    .orElse("UNKNOWN");  // Valeur par défaut si aucun rôle n'est trouvé
+
+            // Retourner le token, le username, l'id et le rôle
+            return new AuthResponse(token, username, userId, role);
         } else {
             throw new UsernameNotFoundException("Invalid user request!");
         }
     }
 
-    @PutMapping("/updateUser/{id}")
+
+    @PatchMapping("/updateUser/{id}")
     public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody Personne updatedPersonne) {
         try {
             // Appeler le service pour mettre à jour l'utilisateur
-            service.updateUser(id, updatedPersonne);
-            return ResponseEntity.ok("User updated successfully");
+            String updateMessage = service.updateUser(id, updatedPersonne);
+            return ResponseEntity.ok(updateMessage);
         } catch (Exception e) {
             // Gérer l'exception si l'utilisateur n'est pas trouvé ou s'il y a une erreur
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
@@ -74,14 +107,30 @@ public class UserController {
     }
 
     @GetMapping("/viewUsers")
-    public ResponseEntity<List<Personne>> getUsers() {
-        List<Personne> personnes = service.getAllPersonne();
-        if (personnes.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Retourne 404 si la liste est vide
-        }
-        return new ResponseEntity<>(personnes, HttpStatus.OK); // Retourne la liste si elle n'est pas vide
+    public ResponseEntity<List<Personne>> getUsers(Authentication authentication) {
+        // Récupérer l'email de l'utilisateur connecté depuis Authentication
+        String currentUserEmail = authentication.getName();
 
+        // Afficher l'email de l'utilisateur connecté pour le débogage
+        System.out.println("Utilisateur connecté : " + currentUserEmail);
+
+        // Récupérer tous les utilisateurs
+        List<Personne> personnes = service.getAllPersonne();
+
+        // Filtrer l'utilisateur connecté de la liste (insensible à la casse)
+        List<Personne> filteredPersonnes = personnes.stream()
+                .filter(personne -> !personne.getEmail().equalsIgnoreCase(currentUserEmail))
+                .collect(Collectors.toList());
+
+        // Vérifier si la liste filtrée est vide
+        if (filteredPersonnes.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        // Retourner la liste filtrée
+        return ResponseEntity.ok(filteredPersonnes);
     }
+
 
     @GetMapping("/viewProfil/{id}")
     public ResponseEntity<Personne> getViewProfil(@PathVariable Long id) {
@@ -92,4 +141,21 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);  // 404 Not Found
         }
     }
+    @DeleteMapping("/deleteUser/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+        try {
+            // Appeler le service pour supprimer l'utilisateur
+            boolean isDeleted = service.deleteUser(id);
+
+            if (isDeleted) {
+                return ResponseEntity.ok("User deleted successfully");
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
+        } catch (Exception e) {
+            // Gestion des erreurs
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while deleting the user");
+        }
+    }
+
 }

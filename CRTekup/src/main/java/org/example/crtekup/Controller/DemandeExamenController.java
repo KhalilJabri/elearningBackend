@@ -34,7 +34,7 @@ public class DemandeExamenController {
 
 
     // Endpoint pour récupérer toutes les demandes d'examen en cours
-    @GetMapping
+    @GetMapping("/all")
     public List<DemandeExamen> getAllDemandes() {
         return demandeExamenService.getAllDemandes();
     }

@@ -1,10 +1,9 @@
-
 package org.example.crtekup.models;
 
 import jakarta.persistence.*;
-import lombok.*;
+        import lombok.*;
 
-import java.util.ArrayList;
+        import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -35,4 +34,8 @@ public class Cours {
 
     @OneToMany(mappedBy = "coursFavoris", cascade = CascadeType.ALL)
     private List<Favoris> favoris = new ArrayList<>();
+
+    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+    private List<Video> videos;
+
 }

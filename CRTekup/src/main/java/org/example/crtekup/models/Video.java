@@ -29,4 +29,8 @@ public class Video {
     @OneToMany(mappedBy = "video", cascade = CascadeType.ALL)
     private List<Commentaire> commentaires = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "course_id", nullable = false)
+    private Cours course;
+
 }
